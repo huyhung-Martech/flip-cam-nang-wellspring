@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Sách Tương Tác 3D - Wellspring</title>
   
   <!-- Font & Icons -->
@@ -14,8 +14,8 @@
     :root {
       --primary: #6366f1;
       --primary-hover: #4f46e5;
-      --bg-gradient: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
-      --surface-glass: rgba(15, 23, 42, 0.82);
+      --bg-gradient: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 65%, #020617 100%);
+      --surface-glass: rgba(15, 23, 42, 0.85);
       --border-glass: rgba(255, 255, 255, 0.15);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
@@ -32,22 +32,14 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-    }
-
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg-gradient);
       color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       user-select: none;
       -webkit-user-select: none;
     }
 
-    /* Transparent mode for LadiPage embeds */
+    /* Transparent background mode when embedded in LadiPage */
     body.transparent-bg {
       background: transparent !important;
     }
@@ -58,8 +50,8 @@
     /* Ambient glow */
     .ambient-glow {
       position: absolute;
-      width: 800px;
-      height: 500px;
+      width: 700px;
+      height: 450px;
       background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.22) 0%, transparent 70%);
       top: 50%;
       left: 50%;
@@ -69,25 +61,68 @@
       filter: blur(60px);
     }
 
-    /* Flipbook Container - Tối đa hóa diện tích hiển thị */
-    .book-wrapper {
+    /* Master Layout: 3 Rows (Header - Book Stage - Footer) */
+    .app-layout {
       position: relative;
       z-index: 10;
       width: 100%;
       height: 100%;
-      max-width: 100vw;
-      max-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    /* Row 1: Header / Hint */
+    .app-header {
+      width: 100%;
+      height: 38px;
+      min-height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px 52px 58px 52px; /* Dành chỗ tối thiểu cho nút mũi tên 2 bên và thanh điều khiển dưới */
+      padding: 0 16px;
+      z-index: 30;
+    }
+
+    .gesture-hint {
+      font-size: 0.78rem;
+      padding: 4px 14px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+      opacity: 0.95;
+      transition: opacity 0.4s ease;
+      white-space: nowrap;
+    }
+
+    /* Row 2: Book Stage - Perfectly bounded, NEVER overflows screen */
+    .book-stage {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+      min-width: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 54px; /* Room for left/right nav arrows */
     }
 
     .flip-book {
       display: none; /* revealed on init */
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75), 0 0 40px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 0, 0, 0.4);
       background-color: transparent;
       border-radius: 4px;
+      margin: auto;
     }
 
     /* Individual Page Styling */
@@ -108,7 +143,7 @@
 
     /* Hard cover spines and realistic 3D lighting overlay */
     .page.--hard {
-      box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.2);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.18);
     }
 
     .page-spine-shadow-left {
@@ -116,7 +151,7 @@
       top: 0;
       bottom: 0;
       right: 0;
-      width: 45px;
+      width: 40px;
       background: linear-gradient(to left, rgba(0, 0, 0, 0.18) 0%, rgba(0,0,0,0.04) 40%, transparent 100%);
       pointer-events: none;
       z-index: 5;
@@ -127,7 +162,7 @@
       top: 0;
       bottom: 0;
       left: 0;
-      width: 45px;
+      width: 40px;
       background: linear-gradient(to right, rgba(0, 0, 0, 0.18) 0%, rgba(0,0,0,0.04) 40%, transparent 100%);
       pointer-events: none;
       z-index: 5;
@@ -138,13 +173,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       z-index: 20;
     }
 
     .spinner {
-      width: 46px;
-      height: 46px;
+      width: 42px;
+      height: 42px;
       border: 3.5px solid rgba(255, 255, 255, 0.15);
       border-top-color: #6366f1;
       border-radius: 50%;
@@ -156,13 +191,13 @@
     }
 
     .loader-text {
-      font-size: 0.9rem;
+      font-size: 0.86rem;
       color: var(--text-muted);
       letter-spacing: 0.5px;
       font-weight: 500;
     }
 
-    /* Side Navigation Arrows */
+    /* Side Navigation Arrows (Centered vertically in book stage) */
     .nav-arrow {
       position: absolute;
       top: 50%;
@@ -170,7 +205,7 @@
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: rgba(15, 23, 42, 0.72);
+      background: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border-glass);
@@ -179,13 +214,13 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      z-index: 30;
+      z-index: 40;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
 
     .nav-arrow:hover {
-      background: rgba(99, 102, 241, 0.92);
+      background: rgba(99, 102, 241, 0.95);
       border-color: rgba(255, 255, 255, 0.45);
       transform: translateY(-50%) scale(1.08);
     }
@@ -194,8 +229,8 @@
       transform: translateY(-50%) scale(0.95);
     }
 
-    .nav-prev { left: 10px; }
-    .nav-next { right: 10px; }
+    .nav-prev { left: 8px; }
+    .nav-next { right: 8px; }
 
     .nav-arrow svg {
       width: 22px;
@@ -207,11 +242,19 @@
       stroke-linejoin: round;
     }
 
-    /* Floating Toolbar */
+    /* Row 3: Dedicated Footer Toolbar - Zero overlap with book */
+    .app-footer {
+      width: 100%;
+      height: 52px;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px 8px 16px;
+      z-index: 30;
+    }
+
     .controls-bar {
-      position: absolute;
-      bottom: 12px;
-      z-index: 40;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -221,8 +264,7 @@
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border-glass);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-      transition: opacity 0.3s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
     }
 
     .ctrl-btn {
@@ -271,27 +313,6 @@
       white-space: nowrap;
     }
 
-    /* Mobile Gestures Hint Badge */
-    .gesture-hint {
-      position: absolute;
-      top: 10px;
-      z-index: 35;
-      font-size: 0.76rem;
-      padding: 5px 14px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.78);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #cbd5e1;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      pointer-events: none;
-      opacity: 0.92;
-      transition: opacity 0.4s ease;
-    }
-
     /* Zoom Overlay Modal */
     .zoom-modal {
       position: fixed;
@@ -326,10 +347,10 @@
 
     .zoom-close {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 42px;
-      height: 42px;
+      top: 18px;
+      right: 18px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.15);
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -345,34 +366,48 @@
       background: rgba(255, 255, 255, 0.3);
     }
 
-    /* Responsive Spacing for Mobile (< 600px) */
+    /* Strict Mobile-First Optimizations (< 600px) */
     @media (max-width: 600px) {
-      .book-wrapper {
-        padding: 6px 6px 48px 6px;
+      .app-header {
+        height: 30px;
+        min-height: 30px;
+      }
+      .gesture-hint {
+        font-size: 0.7rem;
+        padding: 3px 10px;
+      }
+      .book-stage {
+        padding: 2px 38px; /* Compact padding on mobile */
       }
       .nav-arrow {
-        width: 36px;
-        height: 36px;
+        width: 34px;
+        height: 34px;
       }
       .nav-prev { left: 4px; }
       .nav-next { right: 4px; }
+      .nav-arrow svg {
+        width: 18px;
+        height: 18px;
+      }
+      .app-footer {
+        height: 44px;
+        min-height: 44px;
+        padding: 0 8px 4px 8px;
+      }
       .controls-bar {
-        bottom: 6px;
-        padding: 4px 10px;
+        padding: 4px 8px;
         gap: 4px;
       }
       .page-badge {
         font-size: 0.72rem;
         padding: 0 3px;
       }
-      .ctrl-btn svg {
-        width: 16px;
-        height: 16px;
+      .ctrl-btn {
+        padding: 4px;
       }
-      .gesture-hint {
-        top: 6px;
-        font-size: 0.7rem;
-        padding: 4px 10px;
+      .ctrl-btn svg {
+        width: 15px;
+        height: 15px;
       }
     }
   </style>
@@ -381,186 +416,193 @@
 
   <div class="ambient-glow"></div>
 
-  <!-- Hint on top -->
-  <div class="gesture-hint" id="gestureHint">
-    <span>✨ Chạm mép hoặc vuốt ngang để lật trang</span>
-  </div>
-
-  <!-- Flipbook Viewport Container -->
-  <div class="book-wrapper">
+  <!-- Master Layout -->
+  <div class="app-layout">
     
-    <!-- Loader -->
-    <div class="book-loader" id="bookLoader">
-      <div class="spinner"></div>
-      <div class="loader-text">Đang tải sách lật 3D (12 trang)...</div>
-    </div>
+    <!-- 1. Header with gesture hint -->
+    <header class="app-header">
+      <div class="gesture-hint" id="gestureHint">
+        <span>✨ Vuốt ngang hoặc chạm mép để lật trang</span>
+      </div>
+    </header>
 
-    <!-- The Flipbook Container -->
-    <div id="flipbook" class="flip-book">
+    <!-- 2. Book Stage (Fully bounded, will never overflow screen) -->
+    <main class="book-stage" id="bookStage">
       
-      <!-- Trang 1 (Bìa Trước - Hard Cover) -->
-      <div class="page --hard">
-        <picture>
-          <source srcset="images/page_1.webp" type="image/webp">
-          <img src="images/page_1.jpg" alt="Trang 1 - Bìa trước" loading="eager">
-        </picture>
-        <div class="page-spine-shadow-left"></div>
+      <!-- Loader -->
+      <div class="book-loader" id="bookLoader">
+        <div class="spinner"></div>
+        <div class="loader-text">Đang tải sách lật 3D (12 trang)...</div>
       </div>
 
-      <!-- Trang 2 -->
-      <div class="page">
-        <picture>
-          <source srcset="images/page_2.webp" type="image/webp">
-          <img src="images/page_2.jpg" alt="Trang 2" loading="eager">
-        </picture>
-        <div class="page-spine-shadow-right"></div>
+      <!-- Flipbook Container -->
+      <div id="flipbook" class="flip-book">
+        
+        <!-- Trang 1 (Bìa Trước - Hard Cover) -->
+        <div class="page --hard">
+          <picture>
+            <source srcset="images/page_1.webp" type="image/webp">
+            <img src="images/page_1.jpg" alt="Trang 1 - Bìa trước" loading="eager">
+          </picture>
+          <div class="page-spine-shadow-left"></div>
+        </div>
+
+        <!-- Trang 2 -->
+        <div class="page">
+          <picture>
+            <source srcset="images/page_2.webp" type="image/webp">
+            <img src="images/page_2.jpg" alt="Trang 2" loading="eager">
+          </picture>
+          <div class="page-spine-shadow-right"></div>
+        </div>
+
+        <!-- Trang 3 -->
+        <div class="page">
+          <picture>
+            <source srcset="images/page_3.webp" type="image/webp">
+            <img src="images/page_3.jpg" alt="Trang 3" loading="eager">
+          </picture>
+          <div class="page-spine-shadow-left"></div>
+        </div>
+
+        <!-- Trang 4 -->
+        <div class="page">
+          <picture>
+            <source srcset="images/page_4.webp" type="image/webp">
+            <img src="images/page_4.jpg" alt="Trang 4" loading="lazy">
+          </picture>
+          <div class="page-spine-shadow-right"></div>
+        </div>
+
+        <!-- Trang 5 -->
+        <div class="page">
+          <picture>
+            <source srcset="images/page_5.webp" type="image/webp">
+            <img src="images/page_5.jpg" alt="Trang 5" loading="lazy">
+          </picture>
+          <div class="page-spine-shadow-left"></div>
+        </div>
+
+        <!-- Trang 6 -->
+        <div class="page">
+          <picture>
+            <source srcset="images/page_6.webp" type="image/webp">
+            <img src="images/page_6.jpg" alt="Trang 6" loading="lazy">
+          </picture>
+          <div class="page-spine-shadow-right"></div>
+        </div>
+
+        <!-- Trang 7 -->
+        <div class="page">
+          <picture>
+            <source srcset="images/page_7.webp" type="image/webp">
+            <img src="images/page_7.jpg" alt="Trang 7" loading="lazy">
+          </picture>
+          <div class="page-spine-shadow-left"></div>
+        </div>
+
+        <!-- Trang 8 -->
+        <div class="page">
+          <picture>
+            <source srcset="images/page_8.webp" type="image/webp">
+            <img src="images/page_8.jpg" alt="Trang 8" loading="lazy">
+          </picture>
+          <div class="page-spine-shadow-right"></div>
+        </div>
+
+        <!-- Trang 9 -->
+        <div class="page">
+          <picture>
+            <source srcset="images/page_9.webp" type="image/webp">
+            <img src="images/page_9.jpg" alt="Trang 9" loading="lazy">
+          </picture>
+          <div class="page-spine-shadow-left"></div>
+        </div>
+
+        <!-- Trang 10 -->
+        <div class="page">
+          <picture>
+            <source srcset="images/page_10.webp" type="image/webp">
+            <img src="images/page_10.jpg" alt="Trang 10" loading="lazy">
+          </picture>
+          <div class="page-spine-shadow-right"></div>
+        </div>
+
+        <!-- Trang 11 -->
+        <div class="page">
+          <picture>
+            <source srcset="images/page_11.webp" type="image/webp">
+            <img src="images/page_11.jpg" alt="Trang 11" loading="lazy">
+          </picture>
+          <div class="page-spine-shadow-left"></div>
+        </div>
+
+        <!-- Trang 12 (Bìa Sau - Hard Cover) -->
+        <div class="page --hard">
+          <picture>
+            <source srcset="images/page_12.webp" type="image/webp">
+            <img src="images/page_12.jpg" alt="Trang 12 - Bìa sau" loading="lazy">
+          </picture>
+          <div class="page-spine-shadow-right"></div>
+        </div>
+
       </div>
 
-      <!-- Trang 3 -->
-      <div class="page">
-        <picture>
-          <source srcset="images/page_3.webp" type="image/webp">
-          <img src="images/page_3.jpg" alt="Trang 3" loading="eager">
-        </picture>
-        <div class="page-spine-shadow-left"></div>
+      <!-- Navigation Arrows -->
+      <button class="nav-arrow nav-prev" id="btnPrev" title="Trang trước" aria-label="Trang trước">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button class="nav-arrow nav-next" id="btnNext" title="Trang sau" aria-label="Trang sau">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+
+    </main>
+
+    <!-- 3. Footer Toolbar - Always below the book -->
+    <footer class="app-footer">
+      <div class="controls-bar" id="controlsBar">
+        <button class="ctrl-btn" id="btnFirst" title="Về bìa trước">
+          <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+        </button>
+        <button class="ctrl-btn" id="btnBarPrev" title="Trang trước">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        
+        <div class="page-badge" id="pageBadge">Bìa / 12</div>
+
+        <button class="ctrl-btn" id="btnBarNext" title="Trang sau">
+          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+        <button class="ctrl-btn" id="btnLast" title="Trang cuối (Bìa sau)">
+          <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+        </button>
+
+        <div class="divider"></div>
+
+        <!-- Chuyển đổi xem 1 trang / 2 trang -->
+        <button class="ctrl-btn" id="btnToggleView" title="Đổi chế độ xem 1 trang / 2 trang">
+          <svg id="iconViewDual" viewBox="0 0 24 24" style="display:none;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          <svg id="iconViewSingle" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"></rect><line x1="9" y1="7" x2="15" y2="7"></line><line x1="9" y1="11" x2="15" y2="11"></line></svg>
+        </button>
+
+        <!-- Sound Effect Toggle -->
+        <button class="ctrl-btn" id="btnSound" title="Bật/Tắt tiếng lật sách">
+          <svg id="iconSoundOn" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <svg id="iconSoundOff" viewBox="0 0 24 24" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+        </button>
+
+        <!-- Zoom Current Page -->
+        <button class="ctrl-btn" id="btnZoom" title="Phóng to trang hiện tại">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+        </button>
+
+        <!-- Fullscreen Toggle -->
+        <button class="ctrl-btn" id="btnFullscreen" title="Toàn màn hình">
+          <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+        </button>
       </div>
+    </footer>
 
-      <!-- Trang 4 -->
-      <div class="page">
-        <picture>
-          <source srcset="images/page_4.webp" type="image/webp">
-          <img src="images/page_4.jpg" alt="Trang 4" loading="lazy">
-        </picture>
-        <div class="page-spine-shadow-right"></div>
-      </div>
-
-      <!-- Trang 5 -->
-      <div class="page">
-        <picture>
-          <source srcset="images/page_5.webp" type="image/webp">
-          <img src="images/page_5.jpg" alt="Trang 5" loading="lazy">
-        </picture>
-        <div class="page-spine-shadow-left"></div>
-      </div>
-
-      <!-- Trang 6 -->
-      <div class="page">
-        <picture>
-          <source srcset="images/page_6.webp" type="image/webp">
-          <img src="images/page_6.jpg" alt="Trang 6" loading="lazy">
-        </picture>
-        <div class="page-spine-shadow-right"></div>
-      </div>
-
-      <!-- Trang 7 -->
-      <div class="page">
-        <picture>
-          <source srcset="images/page_7.webp" type="image/webp">
-          <img src="images/page_7.jpg" alt="Trang 7" loading="lazy">
-        </picture>
-        <div class="page-spine-shadow-left"></div>
-      </div>
-
-      <!-- Trang 8 -->
-      <div class="page">
-        <picture>
-          <source srcset="images/page_8.webp" type="image/webp">
-          <img src="images/page_8.jpg" alt="Trang 8" loading="lazy">
-        </picture>
-        <div class="page-spine-shadow-right"></div>
-      </div>
-
-      <!-- Trang 9 -->
-      <div class="page">
-        <picture>
-          <source srcset="images/page_9.webp" type="image/webp">
-          <img src="images/page_9.jpg" alt="Trang 9" loading="lazy">
-        </picture>
-        <div class="page-spine-shadow-left"></div>
-      </div>
-
-      <!-- Trang 10 -->
-      <div class="page">
-        <picture>
-          <source srcset="images/page_10.webp" type="image/webp">
-          <img src="images/page_10.jpg" alt="Trang 10" loading="lazy">
-        </picture>
-        <div class="page-spine-shadow-right"></div>
-      </div>
-
-      <!-- Trang 11 -->
-      <div class="page">
-        <picture>
-          <source srcset="images/page_11.webp" type="image/webp">
-          <img src="images/page_11.jpg" alt="Trang 11" loading="lazy">
-        </picture>
-        <div class="page-spine-shadow-left"></div>
-      </div>
-
-      <!-- Trang 12 (Bìa Sau - Hard Cover) -->
-      <div class="page --hard">
-        <picture>
-          <source srcset="images/page_12.webp" type="image/webp">
-          <img src="images/page_12.jpg" alt="Trang 12 - Bìa sau" loading="lazy">
-        </picture>
-        <div class="page-spine-shadow-right"></div>
-      </div>
-
-    </div>
-
-    <!-- Navigation Arrows -->
-    <button class="nav-arrow nav-prev" id="btnPrev" title="Trang trước" aria-label="Trang trước">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-    </button>
-    <button class="nav-arrow nav-next" id="btnNext" title="Trang sau" aria-label="Trang sau">
-      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
-    </button>
-
-  </div>
-
-  <!-- Bottom Controls Bar -->
-  <div class="controls-bar" id="controlsBar">
-    <button class="ctrl-btn" id="btnFirst" title="Về bìa trước">
-      <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
-    </button>
-    <button class="ctrl-btn" id="btnBarPrev" title="Trang trước">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-    </button>
-    
-    <div class="page-badge" id="pageBadge">Bìa / 12</div>
-
-    <button class="ctrl-btn" id="btnBarNext" title="Trang sau">
-      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
-    </button>
-    <button class="ctrl-btn" id="btnLast" title="Trang cuối (Bìa sau)">
-      <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
-    </button>
-
-    <div class="divider"></div>
-
-    <!-- Chuyển đổi xem 1 trang / 2 trang -->
-    <button class="ctrl-btn" id="btnToggleView" title="Đổi chế độ xem 1 trang / 2 trang">
-      <!-- Icon 2 trang (hiện khi đang ở 1 trang) -->
-      <svg id="iconViewDual" viewBox="0 0 24 24" style="display:none;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-      <!-- Icon 1 trang (hiện khi đang ở 2 trang) -->
-      <svg id="iconViewSingle" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"></rect><line x1="9" y1="7" x2="15" y2="7"></line><line x1="9" y1="11" x2="15" y2="11"></line></svg>
-    </button>
-
-    <!-- Sound Effect Toggle -->
-    <button class="ctrl-btn" id="btnSound" title="Bật/Tắt tiếng lật sách">
-      <svg id="iconSoundOn" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-      <svg id="iconSoundOff" viewBox="0 0 24 24" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
-    </button>
-
-    <!-- Zoom Current Page -->
-    <button class="ctrl-btn" id="btnZoom" title="Phóng to trang hiện tại">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-    </button>
-
-    <!-- Fullscreen Toggle -->
-    <button class="ctrl-btn" id="btnFullscreen" title="Toàn màn hình">
-      <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-    </button>
   </div>
 
   <!-- Zoom Modal -->
@@ -584,7 +626,7 @@
       document.body.classList.add('transparent-bg');
     }
 
-    // --- 1. Synthesized Web Audio API Page-Turn Sound ---
+    // --- 1. Web Audio API Page-Turn Sound ---
     class SoundFX {
       constructor() {
         this.enabled = true;
@@ -637,7 +679,7 @@
 
     const soundFX = new SoundFX();
 
-    // --- 2. Initialize PageFlip ---
+    // --- 2. Initialize PageFlip with Exact Proportional Sizing ---
     document.addEventListener('DOMContentLoaded', () => {
       const bookEl = document.getElementById('flipbook');
       const loaderEl = document.getElementById('bookLoader');
@@ -648,25 +690,25 @@
       const iconViewSingle = document.getElementById('iconViewSingle');
 
       // Aspect ratio of our pages: 1200 x 1697 (~0.707)
-      // Tăng kích thước cơ sở để trang sách to lớn, chiếm trọn khung hình
-      const PAGE_WIDTH = 750;
-      const PAGE_HEIGHT = Math.round(PAGE_WIDTH * (1697 / 1200)); // ~1061
+      // Base page size: 550 x 778
+      const PAGE_WIDTH = 550;
+      const PAGE_HEIGHT = Math.round(PAGE_WIDTH * (1697 / 1200)); // 778
 
       const pageFlip = new St.PageFlip(bookEl, {
         width: PAGE_WIDTH,
         height: PAGE_HEIGHT,
         size: 'stretch',
-        minWidth: 260,
-        maxWidth: 2400,
-        minHeight: 368,
-        maxHeight: 2800,
-        maxShadowOpacity: 0.5,
+        minWidth: 200,
+        maxWidth: 1400,
+        minHeight: 280,
+        maxHeight: 1980,
+        maxShadowOpacity: 0.45,
         showCover: true,
         mobileScrollSupport: false,
         usePortrait: true,
         startPage: 0,
         drawShadow: true,
-        flippingTime: 700,
+        flippingTime: 650,
         useMouseEvents: true
       });
 
@@ -705,7 +747,7 @@
         } else {
           iconViewDual.style.display = 'none';
           iconViewSingle.style.display = 'block';
-          btnToggleView.title = 'Đang xem 2 trang - Bấm để phóng to 1 trang (To nhất)';
+          btnToggleView.title = 'Đang xem 2 trang - Bấm để xem 1 trang (To nhất)';
         }
       }
 
@@ -798,9 +840,13 @@
         if (e.target === zoomModal) closeZoom();
       });
 
-      // Window resize update
+      // Auto update on resize
+      let resizeTimer;
       window.addEventListener('resize', () => {
-        if (pageFlip) pageFlip.update();
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          if (pageFlip) pageFlip.update();
+        }, 100);
       });
     });
   </script>
