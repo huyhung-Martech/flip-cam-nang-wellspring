@@ -365,20 +365,21 @@
       background: rgba(255, 255, 255, 0.3);
     }
 
-    /* Căn chuẩn xác trên giao diện Điện thoại (< 600px) - Tối ưu High Mobile Density */
+    /* Căn chuẩn xác trên giao diện Điện thoại (< 600px) - Tăng 5% kích thước, tối ưu High Mobile Density */
     @media (max-width: 600px) {
       .viewport-container {
-        padding: 4px 6px 44px 6px;
+        padding: 2px 2px 42px 2px;
       }
       .top-hint {
-        top: 6px;
-        font-size: 0.68rem;
-        padding: 3px 10px;
+        top: 4px;
+        font-size: 0.67rem;
+        padding: 2px 9px;
         line-height: 1.35;
       }
       .book-wrapper {
-        height: calc(100vh - 75px);
-        max-width: 95vw;
+        height: calc(100vh - 70px);
+        max-width: 99vw;
+        width: 99vw;
         padding: 0;
       }
       .page {
@@ -388,21 +389,22 @@
         box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 0 12px rgba(0, 0, 0, 0.15);
       }
       .nav-arrow {
-        width: 32px;
-        height: 32px;
+        width: 30px;
+        height: 30px;
+        opacity: 0.88;
       }
-      .nav-prev { left: 4px; }
-      .nav-next { right: 4px; }
+      .nav-prev { left: 2px; }
+      .nav-next { right: 2px; }
       .nav-arrow svg {
-        width: 16px;
-        height: 16px;
+        width: 15px;
+        height: 15px;
       }
       .controls-wrapper {
-        bottom: 6px;
+        bottom: 5px;
       }
       .controls-bar {
         padding: 3px 8px;
-        gap: 4px;
+        gap: 3px;
       }
       .page-badge {
         font-size: 0.72rem;
