@@ -114,10 +114,12 @@
 
     .flip-book {
       display: none; /* revealed on init */
-      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 0, 0, 0.4);
-      background-color: transparent;
+      box-shadow: none !important;
+      background-color: transparent !important;
       border-radius: 4px;
       margin: auto;
+      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      will-change: transform;
     }
 
     /* Individual Page Styling */
@@ -125,7 +127,9 @@
       background-color: #fcfbf9;
       overflow: hidden;
       position: relative;
-      border: 1px solid rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.6), 0 3px 12px rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
     }
 
     .page img {
@@ -138,7 +142,7 @@
 
     /* Hard cover spines and realistic 3D lighting overlay */
     .page.--hard {
-      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.18);
+      box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.65), 0 3px 12px rgba(0, 0, 0, 0.35), inset 0 0 20px rgba(0, 0, 0, 0.18);
     }
 
     .page-spine-shadow-left {
@@ -361,20 +365,27 @@
       background: rgba(255, 255, 255, 0.3);
     }
 
-    /* Căn chuẩn xác trên giao diện Điện thoại (< 600px) */
+    /* Căn chuẩn xác trên giao diện Điện thoại (< 600px) - Tối ưu High Mobile Density */
     @media (max-width: 600px) {
       .viewport-container {
-        padding: 4px 6px 48px 6px;
+        padding: 4px 6px 44px 6px;
       }
       .top-hint {
         top: 6px;
         font-size: 0.68rem;
         padding: 3px 10px;
+        line-height: 1.35;
       }
       .book-wrapper {
-        height: calc(100vh - 80px);
-        max-width: 92vw;
+        height: calc(100vh - 75px);
+        max-width: 95vw;
         padding: 0;
+      }
+      .page {
+        box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+      .page.--hard {
+        box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 0 12px rgba(0, 0, 0, 0.15);
       }
       .nav-arrow {
         width: 32px;
@@ -396,6 +407,7 @@
       .page-badge {
         font-size: 0.72rem;
         padding: 0 3px;
+        line-height: 1.35;
       }
       .ctrl-btn {
         padding: 4px;
@@ -691,27 +703,77 @@
         width: PAGE_WIDTH,
         height: PAGE_HEIGHT,
         size: 'stretch',
-        minWidth: 200,
+        minWidth: 100,
         maxWidth: PAGE_WIDTH,
-        minHeight: 280,
+        minHeight: 140,
         maxHeight: PAGE_HEIGHT,
         maxShadowOpacity: 0.45,
         showCover: true,
         mobileScrollSupport: false,
-        usePortrait: true,
+        usePortrait: false,
         startPage: 0,
         drawShadow: true,
         flippingTime: 650,
         useMouseEvents: true
       });
+      window.pageFlip = pageFlip;
 
       // Load from existing DOM elements
       pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+
+      // Căn giữa bìa trước, các trang ruột và bìa sau hoàn hảo trên mọi kích thước màn hình
+      function updateCoverCentering(instant = false) {
+        if (!pageFlip) return;
+        const orientation = pageFlip.getOrientation();
+        const cur = pageFlip.getCurrentPageIndex();
+        const total = pageFlip.getPageCount();
+        const render = pageFlip.getRender();
+        if (!render) return;
+
+        const rect = render.getRect();
+        const flipW = bookEl.offsetWidth;
+
+        if (instant) {
+          bookEl.style.transition = 'none';
+        } else {
+          bookEl.style.transition = 'transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)';
+        }
+
+        if (orientation === 'landscape') {
+          if (cur === 0) {
+            // Trang bìa trước (Trang 1): Căn CHÍNH GIỮA TUYỆT ĐỐI màn hình
+            const coverCenterInFlip = rect.left + 1.5 * rect.pageWidth;
+            const shiftCover = (flipW / 2) - coverCenterInFlip;
+            bookEl.style.transform = `translateX(${shiftCover}px)`;
+          } else if (cur >= total - 1) {
+            // Trang bìa sau (Trang 12): Căn CHÍNH GIỮA TUYỆT ĐỐI màn hình
+            const backCoverCenterInFlip = rect.left + 0.5 * rect.pageWidth;
+            const shiftBackCover = (flipW / 2) - backCoverCenterInFlip;
+            bookEl.style.transform = `translateX(${shiftBackCover}px)`;
+          } else {
+            // Các trang ruột (Trang 2-11): Mở 2 trang, gáy sách nằm CHÍNH GIỮA màn hình
+            const spineInFlip = rect.left + rect.pageWidth;
+            const shiftSpine = (flipW / 2) - spineInFlip;
+            bookEl.style.transform = `translateX(${shiftSpine}px)`;
+          }
+        } else {
+          // Chế độ 1 trang (portrait): Luôn ở chính giữa
+          bookEl.style.transform = 'translateX(0)';
+        }
+
+        if (instant) {
+          void bookEl.offsetHeight;
+          setTimeout(() => {
+            bookEl.style.transition = 'transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)';
+          }, 50);
+        }
+      }
 
       // Event: Init complete
       pageFlip.on('init', () => {
         loaderEl.style.display = 'none';
         bookEl.style.display = 'block';
+        updateCoverCentering(true);
         updateBadge();
         updateViewIcon();
       });
@@ -719,6 +781,7 @@
       // Event: Page Flip
       pageFlip.on('flip', (e) => {
         soundFX.playPageTurn();
+        updateCoverCentering();
         updateBadge();
         if (gestureHint) {
           gestureHint.style.opacity = '0';
@@ -727,6 +790,7 @@
       });
 
       pageFlip.on('changeOrientation', () => {
+        updateCoverCentering();
         updateViewIcon();
         updateBadge();
       });
@@ -764,12 +828,16 @@
 
       // Nút đổi chế độ 1 trang / 2 trang
       btnToggleView.addEventListener('click', () => {
-        const cur = pageFlip.getOrientation();
-        if (cur === 'landscape') {
-          pageFlip.changeOrientation('portrait');
+        const orientation = pageFlip.getOrientation();
+        if (orientation === 'landscape') {
+          pageFlip.getSettings().usePortrait = true;
+          pageFlip.getSettings().minWidth = 9999;
         } else {
-          pageFlip.changeOrientation('landscape');
+          pageFlip.getSettings().usePortrait = false;
+          pageFlip.getSettings().minWidth = 100;
         }
+        pageFlip.update();
+        updateCoverCentering();
         updateViewIcon();
         updateBadge();
       });
@@ -838,7 +906,10 @@
       window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
-          if (pageFlip) pageFlip.update();
+          if (pageFlip) {
+            pageFlip.update();
+            updateCoverCentering();
+          }
         }, 100);
       });
     });
