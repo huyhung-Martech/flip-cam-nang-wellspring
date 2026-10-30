@@ -39,7 +39,7 @@
       -webkit-user-select: none;
     }
 
-    /* Transparent background mode when embedded in LadiPage */
+    /* Chế độ nền trong suốt khi nhúng vào LadiPage */
     body.transparent-bg {
       background: transparent !important;
     }
@@ -61,33 +61,26 @@
       filter: blur(60px);
     }
 
-    /* Master Layout: 3 Rows (Header - Book Stage - Footer) */
-    .app-layout {
+    /* Main Viewport Container */
+    .viewport-container {
       position: relative;
       z-index: 10;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      overflow: hidden;
-    }
-
-    /* Row 1: Header / Hint */
-    .app-header {
-      width: 100%;
-      height: 38px;
-      min-height: 38px;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 0 16px;
-      z-index: 30;
+      overflow: hidden;
+      padding: 8px 16px 58px 16px; /* Dành sẵn 58px phía dưới cho thanh điều khiển, không bao giờ đè lên sách */
     }
 
-    .gesture-hint {
-      font-size: 0.78rem;
+    /* Hint top */
+    .top-hint {
+      position: absolute;
+      top: 10px;
+      z-index: 30;
+      font-size: 0.76rem;
       padding: 4px 14px;
       border-radius: 999px;
       background: rgba(15, 23, 42, 0.75);
@@ -104,17 +97,19 @@
       white-space: nowrap;
     }
 
-    /* Row 2: Book Stage - Perfectly bounded, NEVER overflows screen */
-    .book-stage {
-      flex: 1;
-      width: 100%;
-      min-height: 0;
-      min-width: 0;
+    /* KHUNG SÁCH: Kích thước ban đầu (1100x780) + 25% = 1375px x 973px */
+    /* Căn chính giữa màn hình cả ngang và dọc */
+    .book-wrapper {
       position: relative;
+      z-index: 20;
+      width: 100%;
+      max-width: 1375px; /* Ban đầu 1100px + 25% */
+      height: calc(100vh - 100px); /* Đảm bảo không bao giờ đè vào thanh toolbar dưới */
+      max-height: 973px;  /* Ban đầu 778px + 25% */
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 4px 54px; /* Room for left/right nav arrows */
+      margin: auto;
     }
 
     .flip-book {
@@ -197,9 +192,9 @@
       font-weight: 500;
     }
 
-    /* Side Navigation Arrows (Centered vertically in book stage) */
+    /* Navigation Arrows (Ở 2 bên mép màn hình, căn giữa theo chiều dọc) */
     .nav-arrow {
-      position: absolute;
+      position: fixed;
       top: 50%;
       transform: translateY(-50%);
       width: 44px;
@@ -229,8 +224,8 @@
       transform: translateY(-50%) scale(0.95);
     }
 
-    .nav-prev { left: 8px; }
-    .nav-next { right: 8px; }
+    .nav-prev { left: 16px; }
+    .nav-next { right: 16px; }
 
     .nav-arrow svg {
       width: 22px;
@@ -242,16 +237,16 @@
       stroke-linejoin: round;
     }
 
-    /* Row 3: Dedicated Footer Toolbar - Zero overlap with book */
-    .app-footer {
-      width: 100%;
-      height: 52px;
-      min-height: 52px;
+    /* Dedicated Bottom Toolbar (Cố định ở đáy, không bao giờ che sách) */
+    .controls-wrapper {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 16px 8px 16px;
-      z-index: 30;
     }
 
     .controls-bar {
@@ -366,36 +361,36 @@
       background: rgba(255, 255, 255, 0.3);
     }
 
-    /* Strict Mobile-First Optimizations (< 600px) */
+    /* Căn chuẩn xác tuyệt đối trên giao diện Điện thoại (< 600px) */
     @media (max-width: 600px) {
-      .app-header {
-        height: 30px;
-        min-height: 30px;
+      .viewport-container {
+        padding: 4px 6px 50px 6px;
       }
-      .gesture-hint {
-        font-size: 0.7rem;
+      .top-hint {
+        top: 6px;
+        font-size: 0.68rem;
         padding: 3px 10px;
       }
-      .book-stage {
-        padding: 2px 38px; /* Compact padding on mobile */
+      .book-wrapper {
+        height: calc(100vh - 75px);
+        max-width: 96vw;
+        padding: 0;
       }
       .nav-arrow {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        height: 32px;
       }
       .nav-prev { left: 4px; }
       .nav-next { right: 4px; }
       .nav-arrow svg {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
       }
-      .app-footer {
-        height: 44px;
-        min-height: 44px;
-        padding: 0 8px 4px 8px;
+      .controls-wrapper {
+        bottom: 6px;
       }
       .controls-bar {
-        padding: 4px 8px;
+        padding: 3px 8px;
         gap: 4px;
       }
       .page-badge {
@@ -416,18 +411,15 @@
 
   <div class="ambient-glow"></div>
 
-  <!-- Master Layout -->
-  <div class="app-layout">
+  <div class="viewport-container">
     
-    <!-- 1. Header with gesture hint -->
-    <header class="app-header">
-      <div class="gesture-hint" id="gestureHint">
-        <span>✨ Vuốt ngang hoặc chạm mép để lật trang</span>
-      </div>
-    </header>
+    <!-- Gợi ý lật sách trên cùng -->
+    <div class="top-hint" id="gestureHint">
+      <span>✨ Vuốt ngang hoặc chạm mép để lật trang</span>
+    </div>
 
-    <!-- 2. Book Stage (Fully bounded, will never overflow screen) -->
-    <main class="book-stage" id="bookStage">
+    <!-- KHUNG SÁCH CHÍNH (Căn chính giữa màn hình cả ngang và dọc) -->
+    <main class="book-wrapper" id="bookWrapper">
       
       <!-- Loader -->
       <div class="book-loader" id="bookLoader">
@@ -558,8 +550,8 @@
 
     </main>
 
-    <!-- 3. Footer Toolbar - Always below the book -->
-    <footer class="app-footer">
+    <!-- Thanh công cụ Footer cố định dưới đáy màn hình, tách biệt hoàn toàn với sách -->
+    <div class="controls-wrapper">
       <div class="controls-bar" id="controlsBar">
         <button class="ctrl-btn" id="btnFirst" title="Về bìa trước">
           <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
@@ -601,7 +593,7 @@
           <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
         </button>
       </div>
-    </footer>
+    </div>
 
   </div>
 
@@ -679,7 +671,7 @@
 
     const soundFX = new SoundFX();
 
-    // --- 2. Initialize PageFlip with Exact Proportional Sizing ---
+    // --- 2. Initialize PageFlip with Exactly +25% Size ---
     document.addEventListener('DOMContentLoaded', () => {
       const bookEl = document.getElementById('flipbook');
       const loaderEl = document.getElementById('bookLoader');
@@ -689,19 +681,21 @@
       const iconViewDual = document.getElementById('iconViewDual');
       const iconViewSingle = document.getElementById('iconViewSingle');
 
-      // Aspect ratio of our pages: 1200 x 1697 (~0.707)
-      // Base page size: 550 x 778
-      const PAGE_WIDTH = 550;
-      const PAGE_HEIGHT = Math.round(PAGE_WIDTH * (1697 / 1200)); // 778
+      // Tỉ lệ gốc: 550 x 778.
+      // Kích thước ban đầu + 25%:
+      // PAGE_WIDTH: 550 * 1.25 = 688px
+      // PAGE_HEIGHT: 778 * 1.25 = 973px
+      const PAGE_WIDTH = Math.round(550 * 1.25);  // 688
+      const PAGE_HEIGHT = Math.round(PAGE_WIDTH * (1697 / 1200)); // 973
 
       const pageFlip = new St.PageFlip(bookEl, {
         width: PAGE_WIDTH,
         height: PAGE_HEIGHT,
         size: 'stretch',
         minWidth: 200,
-        maxWidth: 1400,
+        maxWidth: PAGE_WIDTH,
         minHeight: 280,
-        maxHeight: 1980,
+        maxHeight: PAGE_HEIGHT,
         maxShadowOpacity: 0.45,
         showCover: true,
         mobileScrollSupport: false,
