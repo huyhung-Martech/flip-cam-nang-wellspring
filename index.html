@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sách Tương Tác 3D - Wellspring</title>
+  
+  <!-- Font & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --bg-gradient: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+      --surface-glass: rgba(15, 23, 42, 0.82);
+      --border-glass: rgba(255, 255, 255, 0.15);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Transparent mode for LadiPage embeds */
+    body.transparent-bg {
+      background: transparent !important;
+    }
+    body.transparent-bg .ambient-glow {
+      display: none !important;
+    }
+
+    /* Ambient glow */
+    .ambient-glow {
+      position: absolute;
+      width: 800px;
+      height: 500px;
+      background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.22) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(60px);
+    }
+
+    /* Flipbook Container - Tối đa hóa diện tích hiển thị */
+    .book-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      max-width: 100vw;
+      max-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 52px 58px 52px; /* Dành chỗ tối thiểu cho nút mũi tên 2 bên và thanh điều khiển dưới */
+    }
+
+    .flip-book {
+      display: none; /* revealed on init */
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75), 0 0 40px rgba(0, 0, 0, 0.45);
+      background-color: transparent;
+      border-radius: 4px;
+    }
+
+    /* Individual Page Styling */
+    .page {
+      background-color: #fcfbf9;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .page img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* Hard cover spines and realistic 3D lighting overlay */
+    .page.--hard {
+      box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.2);
+    }
+
+    .page-spine-shadow-left {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 45px;
+      background: linear-gradient(to left, rgba(0, 0, 0, 0.18) 0%, rgba(0,0,0,0.04) 40%, transparent 100%);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .page-spine-shadow-right {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 45px;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.18) 0%, rgba(0,0,0,0.04) 40%, transparent 100%);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* Loading Spinner */
+    .book-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      z-index: 20;
+    }
+
+    .spinner {
+      width: 46px;
+      height: 46px;
+      border: 3.5px solid rgba(255, 255, 255, 0.15);
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loader-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    /* Side Navigation Arrows */
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-glass);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 30;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .nav-arrow:hover {
+      background: rgba(99, 102, 241, 0.92);
+      border-color: rgba(255, 255, 255, 0.45);
+      transform: translateY(-50%) scale(1.08);
+    }
+
+    .nav-arrow:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .nav-prev { left: 10px; }
+    .nav-next { right: 10px; }
+
+    .nav-arrow svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Floating Toolbar */
+    .controls-bar {
+      position: absolute;
+      bottom: 12px;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: var(--surface-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      transition: opacity 0.3s ease;
+    }
+
+    .ctrl-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      padding: 6px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+
+    .ctrl-btn:active {
+      transform: scale(0.9);
+    }
+
+    .ctrl-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .divider {
+      width: 1px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.15);
+      margin: 0 2px;
+    }
+
+    .page-badge {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      letter-spacing: 0.5px;
+      padding: 0 6px;
+      white-space: nowrap;
+    }
+
+    /* Mobile Gestures Hint Badge */
+    .gesture-hint {
+      position: absolute;
+      top: 10px;
+      z-index: 35;
+      font-size: 0.76rem;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+      opacity: 0.92;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Zoom Overlay Modal */
+    .zoom-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.94);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+    }
+
+    .zoom-modal.active {
+      display: flex;
+    }
+
+    .zoom-modal img {
+      max-width: 95vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .zoom-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .zoom-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Responsive Spacing for Mobile (< 600px) */
+    @media (max-width: 600px) {
+      .book-wrapper {
+        padding: 6px 6px 48px 6px;
+      }
+      .nav-arrow {
+        width: 36px;
+        height: 36px;
+      }
+      .nav-prev { left: 4px; }
+      .nav-next { right: 4px; }
+      .controls-bar {
+        bottom: 6px;
+        padding: 4px 10px;
+        gap: 4px;
+      }
+      .page-badge {
+        font-size: 0.72rem;
+        padding: 0 3px;
+      }
+      .ctrl-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+      .gesture-hint {
+        top: 6px;
+        font-size: 0.7rem;
+        padding: 4px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-glow"></div>
+
+  <!-- Hint on top -->
+  <div class="gesture-hint" id="gestureHint">
+    <span>✨ Chạm mép hoặc vuốt ngang để lật trang</span>
+  </div>
+
+  <!-- Flipbook Viewport Container -->
+  <div class="book-wrapper">
+    
+    <!-- Loader -->
+    <div class="book-loader" id="bookLoader">
+      <div class="spinner"></div>
+      <div class="loader-text">Đang tải sách lật 3D (12 trang)...</div>
+    </div>
+
+    <!-- The Flipbook Container -->
+    <div id="flipbook" class="flip-book">
+      
+      <!-- Trang 1 (Bìa Trước - Hard Cover) -->
+      <div class="page --hard">
+        <picture>
+          <source srcset="images/page_1.webp" type="image/webp">
+          <img src="images/page_1.jpg" alt="Trang 1 - Bìa trước" loading="eager">
+        </picture>
+        <div class="page-spine-shadow-left"></div>
+      </div>
+
+      <!-- Trang 2 -->
+      <div class="page">
+        <picture>
+          <source srcset="images/page_2.webp" type="image/webp">
+          <img src="images/page_2.jpg" alt="Trang 2" loading="eager">
+        </picture>
+        <div class="page-spine-shadow-right"></div>
+      </div>
+
+      <!-- Trang 3 -->
+      <div class="page">
+        <picture>
+          <source srcset="images/page_3.webp" type="image/webp">
+          <img src="images/page_3.jpg" alt="Trang 3" loading="eager">
+        </picture>
+        <div class="page-spine-shadow-left"></div>
+      </div>
+
+      <!-- Trang 4 -->
+      <div class="page">
+        <picture>
+          <source srcset="images/page_4.webp" type="image/webp">
+          <img src="images/page_4.jpg" alt="Trang 4" loading="lazy">
+        </picture>
+        <div class="page-spine-shadow-right"></div>
+      </div>
+
+      <!-- Trang 5 -->
+      <div class="page">
+        <picture>
+          <source srcset="images/page_5.webp" type="image/webp">
+          <img src="images/page_5.jpg" alt="Trang 5" loading="lazy">
+        </picture>
+        <div class="page-spine-shadow-left"></div>
+      </div>
+
+      <!-- Trang 6 -->
+      <div class="page">
+        <picture>
+          <source srcset="images/page_6.webp" type="image/webp">
+          <img src="images/page_6.jpg" alt="Trang 6" loading="lazy">
+        </picture>
+        <div class="page-spine-shadow-right"></div>
+      </div>
+
+      <!-- Trang 7 -->
+      <div class="page">
+        <picture>
+          <source srcset="images/page_7.webp" type="image/webp">
+          <img src="images/page_7.jpg" alt="Trang 7" loading="lazy">
+        </picture>
+        <div class="page-spine-shadow-left"></div>
+      </div>
+
+      <!-- Trang 8 -->
+      <div class="page">
+        <picture>
+          <source srcset="images/page_8.webp" type="image/webp">
+          <img src="images/page_8.jpg" alt="Trang 8" loading="lazy">
+        </picture>
+        <div class="page-spine-shadow-right"></div>
+      </div>
+
+      <!-- Trang 9 -->
+      <div class="page">
+        <picture>
+          <source srcset="images/page_9.webp" type="image/webp">
+          <img src="images/page_9.jpg" alt="Trang 9" loading="lazy">
+        </picture>
+        <div class="page-spine-shadow-left"></div>
+      </div>
+
+      <!-- Trang 10 -->
+      <div class="page">
+        <picture>
+          <source srcset="images/page_10.webp" type="image/webp">
+          <img src="images/page_10.jpg" alt="Trang 10" loading="lazy">
+        </picture>
+        <div class="page-spine-shadow-right"></div>
+      </div>
+
+      <!-- Trang 11 -->
+      <div class="page">
+        <picture>
+          <source srcset="images/page_11.webp" type="image/webp">
+          <img src="images/page_11.jpg" alt="Trang 11" loading="lazy">
+        </picture>
+        <div class="page-spine-shadow-left"></div>
+      </div>
+
+      <!-- Trang 12 (Bìa Sau - Hard Cover) -->
+      <div class="page --hard">
+        <picture>
+          <source srcset="images/page_12.webp" type="image/webp">
+          <img src="images/page_12.jpg" alt="Trang 12 - Bìa sau" loading="lazy">
+        </picture>
+        <div class="page-spine-shadow-right"></div>
+      </div>
+
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button class="nav-arrow nav-prev" id="btnPrev" title="Trang trước" aria-label="Trang trước">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button class="nav-arrow nav-next" id="btnNext" title="Trang sau" aria-label="Trang sau">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+
+  </div>
+
+  <!-- Bottom Controls Bar -->
+  <div class="controls-bar" id="controlsBar">
+    <button class="ctrl-btn" id="btnFirst" title="Về bìa trước">
+      <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+    </button>
+    <button class="ctrl-btn" id="btnBarPrev" title="Trang trước">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    
+    <div class="page-badge" id="pageBadge">Bìa / 12</div>
+
+    <button class="ctrl-btn" id="btnBarNext" title="Trang sau">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+    <button class="ctrl-btn" id="btnLast" title="Trang cuối (Bìa sau)">
+      <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+    </button>
+
+    <div class="divider"></div>
+
+    <!-- Chuyển đổi xem 1 trang / 2 trang -->
+    <button class="ctrl-btn" id="btnToggleView" title="Đổi chế độ xem 1 trang / 2 trang">
+      <!-- Icon 2 trang (hiện khi đang ở 1 trang) -->
+      <svg id="iconViewDual" viewBox="0 0 24 24" style="display:none;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+      <!-- Icon 1 trang (hiện khi đang ở 2 trang) -->
+      <svg id="iconViewSingle" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"></rect><line x1="9" y1="7" x2="15" y2="7"></line><line x1="9" y1="11" x2="15" y2="11"></line></svg>
+    </button>
+
+    <!-- Sound Effect Toggle -->
+    <button class="ctrl-btn" id="btnSound" title="Bật/Tắt tiếng lật sách">
+      <svg id="iconSoundOn" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+      <svg id="iconSoundOff" viewBox="0 0 24 24" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+    </button>
+
+    <!-- Zoom Current Page -->
+    <button class="ctrl-btn" id="btnZoom" title="Phóng to trang hiện tại">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+    </button>
+
+    <!-- Fullscreen Toggle -->
+    <button class="ctrl-btn" id="btnFullscreen" title="Toàn màn hình">
+      <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+    </button>
+  </div>
+
+  <!-- Zoom Modal -->
+  <div class="zoom-modal" id="zoomModal">
+    <button class="zoom-close" id="zoomClose">&times;</button>
+    <img id="zoomImage" src="" alt="Zoom Page">
+  </div>
+
+  <!-- Local PageFlip Script with CDN Fallback -->
+  <script src="js/page-flip.browser.js"></script>
+  <script>
+    if (typeof St === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"><\/script>');
+    }
+  </script>
+
+  <script>
+    // --- Check URL Params: ?bg=transparent for LadiPage section embedding ---
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('bg') === 'transparent') {
+      document.body.classList.add('transparent-bg');
+    }
+
+    // --- 1. Synthesized Web Audio API Page-Turn Sound ---
+    class SoundFX {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      }
+      playPageTurn() {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          if (this.ctx.state === 'suspended') this.ctx.resume();
+
+          const now = this.ctx.currentTime;
+          const duration = 0.22;
+          const bufferSize = this.ctx.sampleRate * duration;
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+          }
+
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(1400, now);
+          filter.frequency.exponentialRampToValueAtTime(700, now + duration);
+          filter.Q.value = 1.2;
+
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          noise.start(now);
+        } catch (e) {}
+      }
+    }
+
+    const soundFX = new SoundFX();
+
+    // --- 2. Initialize PageFlip ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const bookEl = document.getElementById('flipbook');
+      const loaderEl = document.getElementById('bookLoader');
+      const pageBadge = document.getElementById('pageBadge');
+      const gestureHint = document.getElementById('gestureHint');
+      const btnToggleView = document.getElementById('btnToggleView');
+      const iconViewDual = document.getElementById('iconViewDual');
+      const iconViewSingle = document.getElementById('iconViewSingle');
+
+      // Aspect ratio of our pages: 1200 x 1697 (~0.707)
+      // Tăng kích thước cơ sở để trang sách to lớn, chiếm trọn khung hình
+      const PAGE_WIDTH = 750;
+      const PAGE_HEIGHT = Math.round(PAGE_WIDTH * (1697 / 1200)); // ~1061
+
+      const pageFlip = new St.PageFlip(bookEl, {
+        width: PAGE_WIDTH,
+        height: PAGE_HEIGHT,
+        size: 'stretch',
+        minWidth: 260,
+        maxWidth: 2400,
+        minHeight: 368,
+        maxHeight: 2800,
+        maxShadowOpacity: 0.5,
+        showCover: true,
+        mobileScrollSupport: false,
+        usePortrait: true,
+        startPage: 0,
+        drawShadow: true,
+        flippingTime: 700,
+        useMouseEvents: true
+      });
+
+      // Load from existing DOM elements
+      pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+
+      // Event: Init complete
+      pageFlip.on('init', () => {
+        loaderEl.style.display = 'none';
+        bookEl.style.display = 'block';
+        updateBadge();
+        updateViewIcon();
+      });
+
+      // Event: Page Flip
+      pageFlip.on('flip', (e) => {
+        soundFX.playPageTurn();
+        updateBadge();
+        if (gestureHint) {
+          gestureHint.style.opacity = '0';
+          setTimeout(() => gestureHint.style.display = 'none', 500);
+        }
+      });
+
+      pageFlip.on('changeOrientation', () => {
+        updateViewIcon();
+        updateBadge();
+      });
+
+      function updateViewIcon() {
+        const orientation = pageFlip.getOrientation();
+        if (orientation === 'portrait') {
+          iconViewDual.style.display = 'block';
+          iconViewSingle.style.display = 'none';
+          btnToggleView.title = 'Đang xem 1 trang - Bấm để xem 2 trang (Trang đôi)';
+        } else {
+          iconViewDual.style.display = 'none';
+          iconViewSingle.style.display = 'block';
+          btnToggleView.title = 'Đang xem 2 trang - Bấm để phóng to 1 trang (To nhất)';
+        }
+      }
+
+      function updateBadge() {
+        const cur = pageFlip.getCurrentPageIndex();
+        const total = pageFlip.getPageCount(); // 12
+        const orientation = pageFlip.getOrientation();
+
+        if (cur === 0) {
+          pageBadge.innerText = 'Bìa trước';
+        } else if (cur >= total - 1) {
+          pageBadge.innerText = 'Bìa sau';
+        } else {
+          if (orientation === 'landscape' && cur + 1 < total - 1) {
+            pageBadge.innerText = `Trang ${cur + 1} - ${cur + 2} / ${total}`;
+          } else {
+            pageBadge.innerText = `Trang ${cur + 1} / ${total}`;
+          }
+        }
+      }
+
+      // Nút đổi chế độ 1 trang / 2 trang
+      btnToggleView.addEventListener('click', () => {
+        const cur = pageFlip.getOrientation();
+        if (cur === 'landscape') {
+          pageFlip.changeOrientation('portrait');
+        } else {
+          pageFlip.changeOrientation('landscape');
+        }
+        updateViewIcon();
+        updateBadge();
+      });
+
+      // Navigation Buttons
+      document.getElementById('btnPrev').addEventListener('click', () => pageFlip.flipPrev());
+      document.getElementById('btnNext').addEventListener('click', () => pageFlip.flipNext());
+      document.getElementById('btnBarPrev').addEventListener('click', () => pageFlip.flipPrev());
+      document.getElementById('btnBarNext').addEventListener('click', () => pageFlip.flipNext());
+      document.getElementById('btnFirst').addEventListener('click', () => pageFlip.flip(0));
+      document.getElementById('btnLast').addEventListener('click', () => pageFlip.flip(pageFlip.getPageCount() - 1));
+
+      // Keyboard Controls
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown') pageFlip.flipNext();
+        if (e.key === 'ArrowLeft' || e.key === 'PageUp') pageFlip.flipPrev();
+        if (e.key === 'Home') pageFlip.flip(0);
+        if (e.key === 'End') pageFlip.flip(pageFlip.getPageCount() - 1);
+        if (e.key === 'Escape') closeZoom();
+      });
+
+      // Sound Toggle
+      const btnSound = document.getElementById('btnSound');
+      const iconOn = document.getElementById('iconSoundOn');
+      const iconOff = document.getElementById('iconSoundOff');
+      btnSound.addEventListener('click', () => {
+        soundFX.enabled = !soundFX.enabled;
+        iconOn.style.display = soundFX.enabled ? 'block' : 'none';
+        iconOff.style.display = soundFX.enabled ? 'none' : 'block';
+        if (soundFX.enabled) soundFX.playPageTurn();
+      });
+
+      // Fullscreen Toggle
+      const btnFullscreen = document.getElementById('btnFullscreen');
+      btnFullscreen.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+        }
+      });
+
+      // Zoom Modal
+      const btnZoom = document.getElementById('btnZoom');
+      const zoomModal = document.getElementById('zoomModal');
+      const zoomImg = document.getElementById('zoomImage');
+      const zoomClose = document.getElementById('zoomClose');
+
+      btnZoom.addEventListener('click', () => {
+        const cur = pageFlip.getCurrentPageIndex();
+        const pageNum = cur + 1;
+        zoomImg.src = `images/page_${pageNum}.webp`;
+        zoomModal.classList.add('active');
+      });
+
+      function closeZoom() {
+        zoomModal.classList.remove('active');
+      }
+      zoomClose.addEventListener('click', closeZoom);
+      zoomModal.addEventListener('click', (e) => {
+        if (e.target === zoomModal) closeZoom();
+      });
+
+      // Window resize update
+      window.addEventListener('resize', () => {
+        if (pageFlip) pageFlip.update();
+      });
+    });
+  </script>
+</body>
+</html>

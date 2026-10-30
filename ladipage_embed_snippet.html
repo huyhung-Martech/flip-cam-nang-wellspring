@@ -1,0 +1,28 @@
+<!-- ============================================================ -->
+<!-- MÃ NHÚNG VÀO LADIPAGE (DÀNH CHO PHẦN TỬ HTML HOẶC IFRAME)     -->
+<!-- ============================================================ -->
+
+<!-- CÁCH 1: DÙNG IFRAME (Khuyên dùng - Ổn định và mượt nhất) -->
+<div style="position: relative; width: 100%; max-width: 1200px; margin: 0 auto; overflow: hidden; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+  <iframe 
+    src="https://LINK_HOSTING_CUA_BAN/index.html?bg=transparent" 
+    width="100%" 
+    height="760px" 
+    frameborder="0" 
+    scrolling="no" 
+    allowfullscreen="true"
+    loading="lazy"
+    style="border: none; display: block; width: 100%; min-height: 560px; height: 760px;"
+  ></iframe>
+</div>
+
+<!-- Tối ưu chiều cao tự động cho màn hình Điện Thoại (Mobile) -->
+<style>
+  @media (max-width: 767px) {
+    iframe {
+      height: 580px !important;
+      min-height: 540px !important;
+    }
+  }
+</style>
+
