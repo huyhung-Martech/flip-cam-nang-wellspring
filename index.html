@@ -130,6 +130,7 @@
       border: 1px solid rgba(0, 0, 0, 0.06);
       box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.6), 0 3px 12px rgba(0, 0, 0, 0.3);
       border-radius: 4px;
+      cursor: pointer;
     }
 
     .page img {
@@ -277,6 +278,7 @@
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s;
+      text-decoration: none;
     }
 
     .ctrl-btn:hover {
@@ -324,10 +326,19 @@
       align-items: center;
       justify-content: center;
       padding: 15px;
+      user-select: none;
     }
 
     .zoom-modal.active {
       display: flex;
+    }
+
+    .zoom-img-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 95vw;
+      max-height: 90vh;
     }
 
     .zoom-modal img {
@@ -336,7 +347,7 @@
       object-fit: contain;
       border-radius: 8px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-      animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: zoomIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes zoomIn {
@@ -344,102 +355,102 @@
       to { transform: scale(1); opacity: 1; }
     }
 
-        .zoom-close {
+    .zoom-close {
       position: absolute;
       top: 18px;
       right: 18px;
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border-glass);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #fff;
       font-size: 26px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s;
-      z-index: 1020;
+      transition: background 0.2s, transform 0.2s;
+      z-index: 1010;
     }
     .zoom-close:hover {
-      background: rgba(239, 68, 68, 0.9);
+      background: rgba(255, 255, 255, 0.3);
       transform: scale(1.08);
     }
 
-    /* Zoom Modal Nav Buttons & Badge */
+    /* In-modal Page Navigation Arrows */
     .zoom-arrow {
-      position: absolute;
+      position: fixed;
       top: 50%;
       transform: translateY(-50%);
-      width: 48px;
-      height: 48px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid var(--border-glass);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       z-index: 1010;
-      transition: background 0.2s, transform 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
     .zoom-arrow:hover {
       background: rgba(99, 102, 241, 0.95);
+      border-color: rgba(255, 255, 255, 0.45);
       transform: translateY(-50%) scale(1.08);
     }
     .zoom-arrow:active {
-      transform: translateY(-50%) scale(0.92);
+      transform: translateY(-50%) scale(0.95);
     }
+    .zoom-arrow.zoom-prev { left: 16px; }
+    .zoom-arrow.zoom-next { right: 16px; }
     .zoom-arrow svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       fill: none;
       stroke: currentColor;
       stroke-width: 2.2;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
-    .zoom-prev { left: 20px; }
-    .zoom-next { right: 20px; }
 
     .zoom-page-badge {
-      position: absolute;
-      bottom: 22px;
+      position: fixed;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      padding: 6px 18px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-glass);
-      color: #f8fafc;
-      font-size: 0.84rem;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 0.88rem;
       font-weight: 600;
-      letter-spacing: 0.5px;
+      padding: 6px 16px;
+      border-radius: 20px;
       z-index: 1010;
       pointer-events: none;
-      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     }
 
-    /* Căn chuẩn xác trên giao diện Điện thoại (< 600px) - Phóng to thanh công cụ dễ bấm, tối ưu Zoom 2 lần */
+    /* Căn chuẩn xác trên giao diện Điện thoại (< 600px) - Tối ưu thanh công cụ lớn dễ bấm */
     @media (max-width: 600px) {
       .viewport-container {
-        padding: 2px 2px 54px 2px;
+        padding: 2px 2px 48px 2px;
       }
       .top-hint {
-        top: 6px;
-        font-size: 0.68rem;
-        padding: 3px 10px;
+        top: 4px;
+        font-size: 0.67rem;
+        padding: 2px 9px;
         line-height: 1.35;
       }
       .book-wrapper {
-        height: calc(100vh - 84px);
+        height: calc(100vh - 74px);
         max-width: 99vw;
         width: 99vw;
         padding: 0;
@@ -451,51 +462,63 @@
         box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 0 12px rgba(0, 0, 0, 0.15);
       }
       .nav-arrow {
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         opacity: 0.88;
       }
-      .nav-prev { left: 2px; }
-      .nav-next { right: 2px; }
+      .nav-prev { left: 4px; }
+      .nav-next { right: 4px; }
       .nav-arrow svg {
-        width: 15px;
-        height: 15px;
+        width: 16px;
+        height: 16px;
       }
-      /* PHÓNG TO THANH CÔNG CỤ DỄ BẤM TRÊN MOBILE THEO YÊU CẦU */
       .controls-wrapper {
         bottom: 8px;
-      }
-      .controls-bar {
-        padding: 6px 14px;
-        gap: 6px;
-      }
-      .page-badge {
-        font-size: 0.82rem;
+        width: 100%;
         padding: 0 6px;
-        line-height: 1.35;
+      }
+      /* Phóng to thanh công cụ trên điện thoại để dễ bấm */
+      .controls-bar {
+        padding: 5px 10px;
+        gap: 5px;
+        max-width: 98vw;
       }
       .ctrl-btn {
         padding: 6px;
+        min-width: 32px;
+        min-height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
       .ctrl-btn svg {
         width: 18px;
         height: 18px;
       }
-      /* Nút và badge phóng to trong modal zoom trên mobile */
+      .page-badge {
+        font-size: 0.82rem;
+        padding: 0 8px;
+        font-weight: 600;
+        min-width: 66px;
+        text-align: center;
+        line-height: 1.35;
+      }
+      .divider {
+        height: 18px;
+        margin: 0 2px;
+      }
+
+      /* Modal zoom trên mobile */
       .zoom-arrow {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 40px;
       }
-      .zoom-prev { left: 8px; }
-      .zoom-next { right: 8px; }
+      .zoom-arrow.zoom-prev { left: 8px; }
+      .zoom-arrow.zoom-next { right: 8px; }
       .zoom-arrow svg {
-        width: 22px;
-        height: 22px;
-      }
-      .zoom-page-badge {
-        bottom: 14px;
-        font-size: 0.76rem;
-        padding: 4px 12px;
+        width: 18px;
+        height: 18px;
       }
       .zoom-close {
         top: 12px;
@@ -503,6 +526,32 @@
         width: 38px;
         height: 38px;
         font-size: 22px;
+      }
+      .zoom-page-badge {
+        bottom: 14px;
+        font-size: 0.78rem;
+        padding: 4px 12px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .controls-bar {
+        padding: 4px 6px;
+        gap: 2px;
+      }
+      .ctrl-btn {
+        padding: 4px;
+        min-width: 28px;
+        min-height: 28px;
+      }
+      .ctrl-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+      .page-badge {
+        font-size: 0.74rem;
+        padding: 0 4px;
+        min-width: 58px;
       }
     }
   </style>
@@ -515,7 +564,7 @@
     
     <!-- Gợi ý lật sách trên cùng -->
     <div class="top-hint" id="gestureHint">
-      <span>✨ Vuốt ngang hoặc chạm mép để lật trang</span>
+      <span>✨ Chạm 1 lần vào trang để phóng to · Vuốt hoặc chạm mép để lật</span>
     </div>
 
     <!-- KHUNG SÁCH CHÍNH (Đã giảm 10% kích thước, căn chính giữa màn hình) -->
@@ -692,19 +741,22 @@
         <button class="ctrl-btn" id="btnFullscreen" title="Toàn màn hình">
           <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
         </button>
+
       </div>
     </div>
 
   </div>
 
-  <!-- Zoom Modal (Phóng to trang chi tiết với nút chuyển trang & vuốt chạm) -->
+  <!-- Zoom Modal with Page Turn Navigation -->
   <div class="zoom-modal" id="zoomModal">
-    <button class="zoom-close" id="zoomClose" title="Đóng">&times;</button>
-    <button class="zoom-arrow zoom-prev" id="zoomPrev" title="Trang trước">
+    <button class="zoom-close" id="zoomClose" title="Đóng phóng to">&times;</button>
+    <button class="zoom-arrow zoom-prev" id="zoomPrev" title="Trang trước" aria-label="Trang trước">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
     </button>
-    <img id="zoomImage" src="" alt="Zoom Page">
-    <button class="zoom-arrow zoom-next" id="zoomNext" title="Trang sau">
+    <div class="zoom-img-container">
+      <img id="zoomImage" src="" alt="Zoom Page">
+    </div>
+    <button class="zoom-arrow zoom-next" id="zoomNext" title="Trang sau" aria-label="Trang sau">
       <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
     </button>
     <div class="zoom-page-badge" id="zoomBadge">Trang 1 / 12</div>
@@ -778,7 +830,7 @@
 
     const soundFX = new SoundFX();
 
-    // --- 2. Initialize PageFlip (Giảm thêm 10% kích thước) ---
+    // --- 2. Initialize PageFlip ---
     document.addEventListener('DOMContentLoaded', () => {
       const bookEl = document.getElementById('flipbook');
       const loaderEl = document.getElementById('bookLoader');
@@ -788,9 +840,8 @@
       const iconViewDual = document.getElementById('iconViewDual');
       const iconViewSingle = document.getElementById('iconViewSingle');
 
-      // Tỉ lệ gốc giảm 10%:
-      // PAGE_WIDTH: 688 * 0.9 = 619px
-      // PAGE_HEIGHT: 619 * (1697 / 1200) = 876px
+      // Tỉ lệ gốc:
+      // PAGE_WIDTH: 619px, PAGE_HEIGHT: 876px
       const PAGE_WIDTH = 619;
       const PAGE_HEIGHT = Math.round(PAGE_WIDTH * (1697 / 1200)); // 876
 
@@ -945,15 +996,6 @@
       document.getElementById('btnFirst').addEventListener('click', () => pageFlip.flip(0));
       document.getElementById('btnLast').addEventListener('click', () => pageFlip.flip(pageFlip.getPageCount() - 1));
 
-      // Keyboard Controls
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === 'PageDown') pageFlip.flipNext();
-        if (e.key === 'ArrowLeft' || e.key === 'PageUp') pageFlip.flipPrev();
-        if (e.key === 'Home') pageFlip.flip(0);
-        if (e.key === 'End') pageFlip.flip(pageFlip.getPageCount() - 1);
-        if (e.key === 'Escape') closeZoom();
-      });
-
       // Sound Toggle
       const btnSound = document.getElementById('btnSound');
       const iconOn = document.getElementById('iconSoundOn');
@@ -975,7 +1017,7 @@
         }
       });
 
-      // ponytail: Zoom Modal với nút chuyển trang & Double-tap/Double-click trên trang
+      // Zoom Modal State & Handlers
       const btnZoom = document.getElementById('btnZoom');
       const zoomModal = document.getElementById('zoomModal');
       const zoomImg = document.getElementById('zoomImage');
@@ -986,22 +1028,52 @@
 
       let currentZoomPage = 1;
 
-      function openZoom(pageNum) {
-        if (!pageFlip) return;
-        const total = pageFlip.getPageCount();
-        currentZoomPage = Math.max(1, Math.min(pageNum, total));
+      function renderZoomPage() {
         zoomImg.src = `images/page_${currentZoomPage}.webp`;
-        if (zoomBadge) {
-          if (currentZoomPage === 1) zoomBadge.innerText = 'Trang 1: Bìa trước';
-          else if (currentZoomPage === total) zoomBadge.innerText = `Trang ${total}: Bìa sau`;
-          else zoomBadge.innerText = `Trang ${currentZoomPage} / ${total}`;
+        if (currentZoomPage === 1) {
+          zoomBadge.innerText = 'Bìa trước';
+        } else if (currentZoomPage === 12) {
+          zoomBadge.innerText = 'Bìa sau';
+        } else {
+          zoomBadge.innerText = `Trang ${currentZoomPage} / 12`;
         }
+
+        zoomPrev.style.opacity = currentZoomPage > 1 ? '1' : '0.25';
+        zoomPrev.style.pointerEvents = currentZoomPage > 1 ? 'auto' : 'none';
+        zoomNext.style.opacity = currentZoomPage < 12 ? '1' : '0.25';
+        zoomNext.style.pointerEvents = currentZoomPage < 12 ? 'auto' : 'none';
+      }
+
+      function openZoom(pageNum) {
+        currentZoomPage = Math.min(12, Math.max(1, pageNum || 1));
+        renderZoomPage();
         zoomModal.classList.add('active');
       }
 
+      function zoomPrevPage() {
+        if (currentZoomPage > 1) {
+          currentZoomPage--;
+          soundFX.playPageTurn();
+          renderZoomPage();
+        }
+      }
+
+      function zoomNextPage() {
+        if (currentZoomPage < 12) {
+          currentZoomPage++;
+          soundFX.playPageTurn();
+          renderZoomPage();
+        }
+      }
+
       function closeZoom() {
-        zoomModal.classList.remove('active');
-        if (pageFlip) pageFlip.flip(currentZoomPage - 1);
+        if (zoomModal.classList.contains('active')) {
+          zoomModal.classList.remove('active');
+          const targetIndex = currentZoomPage - 1;
+          if (pageFlip && pageFlip.getCurrentPageIndex() !== targetIndex) {
+            pageFlip.flip(targetIndex);
+          }
+        }
       }
 
       btnZoom.addEventListener('click', () => {
@@ -1009,67 +1081,132 @@
         openZoom(cur + 1);
       });
 
-      zoomClose.addEventListener('click', closeZoom);
-      zoomModal.addEventListener('click', (e) => {
-        if (e.target === zoomModal) closeZoom();
-      });
-
       zoomPrev.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentZoomPage > 1) {
-          openZoom(currentZoomPage - 1);
-          soundFX.playPageTurn();
-        }
+        zoomPrevPage();
       });
 
       zoomNext.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentZoomPage < pageFlip.getPageCount()) {
-          openZoom(currentZoomPage + 1);
-          soundFX.playPageTurn();
+        zoomNextPage();
+      });
+
+      zoomClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeZoom();
+      });
+
+      zoomModal.addEventListener('click', (e) => {
+        if (e.target === zoomModal || e.target.classList.contains('zoom-img-container')) {
+          closeZoom();
         }
       });
 
-      // Nhấn 2 lần (Double-click trên Desktop & Double-tap trên Mobile) để phóng to trang đó
-      bookEl.addEventListener('dblclick', (e) => {
-        const pageEl = e.target.closest('.page');
-        const pages = Array.from(document.querySelectorAll('.page'));
-        const idx = pageEl ? pages.indexOf(pageEl) : pageFlip.getCurrentPageIndex();
-        openZoom(idx >= 0 ? idx + 1 : pageFlip.getCurrentPageIndex() + 1);
-      });
-
-      let lastTapTime = 0;
-      bookEl.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        if (now - lastTapTime < 380) {
-          const pageEl = e.target.closest('.page');
-          const pages = Array.from(document.querySelectorAll('.page'));
-          const idx = pageEl ? pages.indexOf(pageEl) : pageFlip.getCurrentPageIndex();
-          openZoom(idx >= 0 ? idx + 1 : pageFlip.getCurrentPageIndex() + 1);
-          lastTapTime = 0;
-        } else {
-          lastTapTime = now;
-        }
-      });
-
-      // Vuốt sang trái / phải khi đang xem phóng to để lật trang
-      let touchStartX = 0;
+      // Swipe inside Zoom Modal (Vuốt để chuyển trang khi đang phóng to)
+      let modalTouchStartX = 0;
+      let modalTouchStartY = 0;
       zoomModal.addEventListener('touchstart', (e) => {
-        if (e.touches.length > 0) touchStartX = e.touches[0].clientX;
+        if (e.touches.length === 1) {
+          modalTouchStartX = e.touches[0].clientX;
+          modalTouchStartY = e.touches[0].clientY;
+        }
       }, { passive: true });
 
       zoomModal.addEventListener('touchend', (e) => {
-        if (e.changedTouches.length > 0) {
-          const diff = e.changedTouches[0].clientX - touchStartX;
-          if (diff > 45 && currentZoomPage > 1) {
-            openZoom(currentZoomPage - 1);
-            soundFX.playPageTurn();
-          } else if (diff < -45 && currentZoomPage < pageFlip.getPageCount()) {
-            openZoom(currentZoomPage + 1);
-            soundFX.playPageTurn();
-          }
+        const touch = e.changedTouches[0];
+        if (!touch) return;
+        const dx = touch.clientX - modalTouchStartX;
+        const dy = touch.clientY - modalTouchStartY;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+          if (dx < 0) zoomNextPage();
+          else zoomPrevPage();
         }
       }, { passive: true });
+
+      // Determine clicked page in flipbook (1 click / tap zoom)
+      function getPageNumFromX(clientX) {
+        const cur = pageFlip.getCurrentPageIndex();
+        const total = pageFlip.getPageCount();
+        const orientation = pageFlip.getOrientation();
+
+        if (orientation === 'portrait') {
+          return Math.min(total, Math.max(1, cur + 1));
+        }
+
+        if (cur === 0) return 1;
+        if (cur >= total - 1) return total;
+
+        const bookRect = bookEl.getBoundingClientRect();
+        const spineX = bookRect.left + bookRect.width / 2;
+        return clientX < spineX ? (cur + 1) : Math.min(total, cur + 2);
+      }
+
+      // Chạm / Bấm 1 lần vào trang để phóng to (Single Click / Single Tap to Zoom)
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchStartTime = 0;
+      let isTouching = false;
+
+      bookEl.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          touchStartTime = Date.now();
+          isTouching = true;
+        }
+      }, { passive: true });
+
+      bookEl.addEventListener('touchend', (e) => {
+        if (!isTouching) return;
+        isTouching = false;
+        const touch = e.changedTouches[0];
+        if (!touch) return;
+        const dist = Math.hypot(touch.clientX - touchStartX, touch.clientY - touchStartY);
+        const duration = Date.now() - touchStartTime;
+
+        // Chạm 1 lần nhẹ (không phải vuốt lật trang) -> Phóng to
+        if (dist < 14 && duration < 380) {
+          const pageNum = getPageNumFromX(touch.clientX);
+          openZoom(pageNum);
+        }
+      }, { passive: true });
+
+      let mouseDownX = 0;
+      let mouseDownY = 0;
+      let mouseDownTime = 0;
+
+      bookEl.addEventListener('mousedown', (e) => {
+        mouseDownX = e.clientX;
+        mouseDownY = e.clientY;
+        mouseDownTime = Date.now();
+      });
+
+      bookEl.addEventListener('mouseup', (e) => {
+        if (Date.now() - touchStartTime < 500) return; // Tránh kích hoạt kép trên màn hình cảm ứng
+        const dist = Math.hypot(e.clientX - mouseDownX, e.clientY - mouseDownY);
+        const duration = Date.now() - mouseDownTime;
+
+        // Bấm 1 lần chuột -> Phóng to
+        if (dist < 8 && duration < 350) {
+          const pageNum = getPageNumFromX(e.clientX);
+          openZoom(pageNum);
+        }
+      });
+
+      // Keyboard Controls
+      window.addEventListener('keydown', (e) => {
+        if (zoomModal.classList.contains('active')) {
+          if (e.key === 'ArrowRight' || e.key === 'PageDown') { zoomNextPage(); return; }
+          if (e.key === 'ArrowLeft' || e.key === 'PageUp') { zoomPrevPage(); return; }
+          if (e.key === 'Escape') { closeZoom(); return; }
+        } else {
+          if (e.key === 'ArrowRight' || e.key === 'PageDown') pageFlip.flipNext();
+          if (e.key === 'ArrowLeft' || e.key === 'PageUp') pageFlip.flipPrev();
+          if (e.key === 'Home') pageFlip.flip(0);
+          if (e.key === 'End') pageFlip.flip(pageFlip.getPageCount() - 1);
+        }
+      });
+
       // Auto update on resize
       let resizeTimer;
       window.addEventListener('resize', () => {
